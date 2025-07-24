@@ -199,16 +199,19 @@ def handle_message(self, toolFlag, messageIsRequest, messageInfo):
 
 def send_request_to_autorize(self, messageInfo):
     if messageInfo.getResponse() is None:
-        message = makeMessage(self, messageInfo,False,False)
-        requestResponse = makeRequest(self, messageInfo, message)
-        checkAuthorization(self, requestResponse,self._helpers.analyzeResponse(requestResponse.getResponse()).getHeaders(),self.doUnauthorizedRequest.isSelected())
+        attacker_message = makeMessage(self, messageInfo, False, False)
+        attacker_response = makeRequest(self, messageInfo, attacker_message)
+        victim_message = makeMessage(self, messageInfo, True, True)
+        victim_response = makeRequest(self, messageInfo, victim_message)
+        checkAuthorization(self, attacker_response, self._helpers.analyzeResponse(attacker_response.getResponse()).getHeaders(), self.doUnauthorizedRequest.isSelected())
+        checkAuthorization(self, victim_response, self._helpers.analyzeResponse(victim_response.getResponse()).getHeaders(), self.doUnauthorizedRequest.isSelected())
     else:
         request = messageInfo.getRequest()
         response = messageInfo.getResponse()
         httpService = messageInfo.getHttpService()
-        newHttpRequestResponse = IHttpRequestResponseImplementation(httpService,request,response)
+        newHttpRequestResponse = IHttpRequestResponseImplementation(httpService, request, response)
         newHttpRequestResponsePersisted = self._callbacks.saveBuffersToTempFiles(newHttpRequestResponse)
-        checkAuthorization(self, newHttpRequestResponsePersisted,self._helpers.analyzeResponse(messageInfo.getResponse()).getHeaders(),self.doUnauthorizedRequest.isSelected())
+        checkAuthorization(self, newHttpRequestResponsePersisted, self._helpers.analyzeResponse(messageInfo.getResponse()).getHeaders(), self.doUnauthorizedRequest.isSelected())
 
 def auth_enforced_via_enforcement_detectors(self, filters, requestResponse, andOrEnforcement):
     response = requestResponse.getResponse()
